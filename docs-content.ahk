@@ -1,4 +1,5 @@
-﻿#Include ..\..\DocsBuilder\DocsBuilder.ahk
+﻿#Include DocsBuilder.ahk
+; https://github.com/Nich-Cebolla/AutoHotkey-MD-to-AHK-Forum-Post
 
 AhkForum := {
     Link: ''
