@@ -1,4 +1,4 @@
-﻿/*
+/*
     v1.00.00
 */
 
@@ -81,9 +81,23 @@ class ConvertToForum {
         StrList := '[list]' StrList '[/list]`n'
     }
 
+    static ConvertTagWithType(&StrList) {
+        global AhkForum
+        StrList := Trim(StrList, '`n')
+        while Pos := RegExMatch(StrList, 's)(?:^|\R)\K-\s+(?<type>\{[^}]+\})\s+(?<description>.+?)(?=\R-|$)', &MatchParam, Pos ?? 1) {
+            StrList := StrReplace(StrList, MatchParam[0],
+                '[*]' AhkForum.ParamSize AhkForum.ParamTypeColor '[b]' MatchParam['type']
+                '[/color][/b] ' MatchParam['description'] '[/size]'
+            )
+        }
+        StrList := '[list]' StrList '[/list]`n'
+    }
+
     static ConvertList(StrList) {
         if RegExMatch(StrList, 'm)^- \{[^}]+\}\s+\S+ - ')
             this.ConvertParam(&StrList)
+        else if RegExMatch(StrList, 'm)^- \{[^}]+\}\s+- ')
+            this.ConvertTagWithType(&StrList)
         else
             this.ProcessList(&StrList)
         return StrList
@@ -94,9 +108,9 @@ class ConvertToForum {
         while Pos := RegExMatch(StrList, 'm)^(\s*)-\s+(.+)', &MatchListContent, Pos ?? 1) {
             if MatchListContent.Len[1] {
                 StrList := StrReplace(StrList, MatchListContent[0]
-                    , (A_Index == 1 ? '[indent=' MatchListContent.Len[1] '][list]'
-                    : '[indent=' MatchListContent.Len[1] ']')
-                    '[*]' AhkForum.TextColor AhkForum.TextSize MatchListContent[2] '[/size][/color]'
+                    , (A_Index == 1 ? '[list]' : '')
+                    '[*][indent=' MatchListContent.Len[1] ']'
+                    AhkForum.TextColor AhkForum.TextSize MatchListContent[2] '[/size][/color][/indent]'
                 )
             } else {
                 StrList := StrReplace(StrList, MatchListContent[0]
@@ -239,7 +253,7 @@ class ConvertToForum {
 
     static ExtractList(&Str, &OutList?) {
         OutList := []
-        while RegExMatch(Str, 'm)(?:^-.+\R?)+', &MatchList) {
+        while RegExMatch(Str, 'm)(?:^ *-.+\R?)+', &MatchList) {
             Str := StrReplace(Str, MatchList[0], '@@@List:' A_Index '@@@')
             OutList.Push(MatchList)
         }
