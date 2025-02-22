@@ -161,7 +161,7 @@ class ConvertToForum {
 
     static ExtractCode(&Str, &OutCodeBlocks, &OutInlineCode) {
         OutCodeBlocks := []
-        while RegExMatch(Str, 's)``````(.+?)``````', &MatchCode) {
+        while RegExMatch(Str, 's)``````(?<language>\w*)(?<code>.+?)``````', &MatchCode) {
             Str := StrReplace(Str, MatchCode[0], '@@@CodeBlock:' A_Index '@@@')
             OutCodeBlocks.Push(MatchCode)
         }
@@ -175,7 +175,7 @@ class ConvertToForum {
     static ReplaceCode(&Str, CodeBlocks?, InlineCode?) {
         if IsSet(CodeBlocks) {
             for Code in CodeBlocks
-                Str := StrReplace(Str, '@@@CodeBlock:' A_Index '@@@', '[code]`n' Code[1] '`n[/code]')
+                Str := StrReplace(Str, '@@@CodeBlock:' A_Index '@@@', '[code]`n' Code['code'] '`n[/code]')
         }
         if IsSet(InlineCode) {
             for Code in InlineCode
