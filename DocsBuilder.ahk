@@ -1,5 +1,5 @@
 /*
-    v1.00.00
+    v1.00.01
 */
 
 class DocsBuilder {
@@ -161,7 +161,7 @@ class ConvertToForum {
 
     static ExtractCode(&Str, &OutCodeBlocks, &OutInlineCode) {
         OutCodeBlocks := []
-        while RegExMatch(Str, '``````(.+?)``````', &MatchCode) {
+        while RegExMatch(Str, 's)``````(.+?)``````', &MatchCode) {
             Str := StrReplace(Str, MatchCode[0], '@@@CodeBlock:' A_Index '@@@')
             OutCodeBlocks.Push(MatchCode)
         }
@@ -197,6 +197,7 @@ class ConvertToForum {
             ; Add header, file headers are handled separately.
             if RegExMatch(MatchContent[2], '\.[a-zA-Z0-9]{2,4}$') {
                 Str .= AhkForum.FileNameColor AhkForum.FileNameSize '[b]' MatchContent[2] '[/b][/size][/color]`n'
+                ; If the header is a file name, the flag is set to be referened later in the loop.
                 FlagFile := true
             } else {
                 Str .= (
@@ -205,10 +206,13 @@ class ConvertToForum {
                     Trim(MatchContent[2], '`n') '[/b][/size][/color]`n'
                 )
             }
+            ; Split the body into its paragraphs.
             BodySplit := StrSplit(MatchContent[3], '`n`n', '`n')
             for B in BodySplit {
+                ; If the item is only whitespace, skip it.
                 if !RegExMatch(B, '\S')
                     continue
+                ; Handle the link text.
                 if RegExMatch(B, 'm)^@@@Link@@@', &MatchLink) {
                     Str .= StrReplace(B, MatchLink[0]
                     , AhkForum.Header2Color AhkForum.Header2Size
@@ -240,8 +244,16 @@ class ConvertToForum {
                         else
                             Pos := MatchList.Pos + MatchList.Len + 1
                     }
-                } else
+                ; If the paragraph is a block of inline code, it should not have size and color tags.
+                ; Currently, it's required that code blocks are separated from other body paragraphs by
+                ; two newlines, or else this replaement doesn't work correctly.
+                /* @Todo - update so this is nolonger necessary. */
+                } else if InStr(B, '@@@CodeBlock:') {
+                    Str .= B '`n`n'
+                ; All other paragraphs can be wrapped in size and color tags.
+                } else {
                     Str .= AhkForum.TextColor AhkForum.TextSize B '[/size][/color]' (FlagFile ? '`n' : '`n`n')
+                }
             }
             ; If the header is a file name, put the code in code blocks.
             if FlagFile {
