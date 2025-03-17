@@ -1,5 +1,5 @@
 /*
-    v1.00.01
+    v1.0.2
 */
 
 class DocsBuilder {
@@ -36,7 +36,7 @@ class ConvertToForum {
     static ConvertInlineCode(&Str) {
         Str := RegExReplace(Str, '``([^``]+)``', '[c]$1[/c]')
     }
-    
+
     static ConvertBold(&Str) {
         Str := RegExReplace(Str, '\*\*(.+?)\*\*', '[b]$1[/b]')
     }
@@ -44,11 +44,11 @@ class ConvertToForum {
     static ConvertItalics(&Str) {
         Str := RegExReplace(Str, '\*(.+?)\*', '[i]$1[/i]')
     }
-    
+
     static ConvertCodeBlock(&Str) {
         Str := RegExReplace(Str, '``````(.*?)``````', '[code]$1[/code]')
     }
-    
+
     static ConvertUrl(&Str) {
         while RegExMatch(Str, '(?<!\])(?<!\))https?://\S+', &MatchUrl) {
             Str := StrReplace(Str, MatchUrl[0], '[url]' MatchUrl[0] '[/url]')
@@ -121,7 +121,7 @@ class ConvertToForum {
         }
         StrList .= '[/list]`n'
     }
-    
+
     static AddCode(&Str, Path) {
         Str .= (
             '[code]`n'
@@ -182,7 +182,7 @@ class ConvertToForum {
                 Str := StrReplace(Str, '@@@InlineCode:' A_Index '@@@', '[c]' Code[1] '[/c]')
         }
     }
-    
+
     static ProcessContent(&Str, Lists) {
         global AhkForum
         FlagFile := false
@@ -195,7 +195,7 @@ class ConvertToForum {
             if !RegExMatch(S, '^(#*)\s+(.+)\R([\w\W]*)', &MatchContent)
                 throw Error('The pattern didn`'t match.', -1)
             ; Add header, file headers are handled separately.
-            if RegExMatch(MatchContent[2], '\.[a-zA-Z0-9]{2,4}$') {
+            if RegExMatch(MatchContent[2], '\.[a-zA-Z0-9]{2,4}$') && FileExist('..\' MatchContent[2]) {
                 Str .= AhkForum.FileNameColor AhkForum.FileNameSize '[b]' MatchContent[2] '[/b][/size][/color]`n'
                 ; If the header is a file name, the flag is set to be referened later in the loop.
                 FlagFile := true
