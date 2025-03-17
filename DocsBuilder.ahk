@@ -207,6 +207,7 @@ class ConvertToForum {
                 )
             }
             ; Split the body into its paragraphs.
+            OutputDebug('`n`n' MatchContent[0])
             BodySplit := StrSplit(MatchContent[3], '`n`n', '`n')
             for B in BodySplit {
                 ; If the item is only whitespace, skip it.
@@ -266,7 +267,7 @@ class ConvertToForum {
     static ExtractList(&Str, &OutList?) {
         OutList := []
         while RegExMatch(Str, 'm)(?:^ *-.+\R?)+', &MatchList) {
-            Str := StrReplace(Str, MatchList[0], '@@@List:' A_Index '@@@')
+            Str := StrReplace(Str, Trim(MatchList[0], '`n'), '@@@List:' A_Index '@@@')
             OutList.Push(MatchList)
         }
     }
